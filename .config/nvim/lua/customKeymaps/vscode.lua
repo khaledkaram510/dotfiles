@@ -97,7 +97,7 @@ M.setup = function()
         end)
     end
 
-    local ok_flash = pcall(require, "flash")
+--[[     local ok_flash = pcall(require, "flash")
     if ok_flash then
         -- Flash integration
         map({ "n", "x", "o" },"s", function() require("flash").jump() end, {desc = "Flash"} )
@@ -105,7 +105,7 @@ M.setup = function()
         map("o", "r",function() require("flash").remote() end, {desc = "Remote Flash" })
         map({ "o", "x" }, "R",function() require("flash").treesitter_search() end, {desc = "Treesitter Search"} )
         map({ "c" }, "<c-s>",function() require("flash").toggle() end, {desc = "Toggle Flash Search"} )
-    end
+    end ]]
 end
 
 return M
