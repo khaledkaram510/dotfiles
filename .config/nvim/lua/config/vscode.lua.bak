@@ -1,4 +1,3 @@
--- filepath: /home/fedusr/.config/nvim/lua/config/vscode.lua
 -- VSCode Neovim configuration
 local M = {}
 
@@ -31,28 +30,8 @@ M.register_vscode_commands = function()
     vim.fn.VSCodeNotify(cmd)
   end, {nargs = "?"})
   
-  -- Custom Treesitter commands for VSpaceCode integration
-  vim.api.nvim_create_user_command("TSVisualSelection", function()
-    vim.cmd("normal! v")
-    require("nvim-treesitter.incremental_selection").init_selection()
-  end, {})
-  
-  vim.api.nvim_create_user_command("TSIncremental", function()
-    require("nvim-treesitter.incremental_selection").node_incremental()
-  end, {})
-  
-  vim.api.nvim_create_user_command("TSDecremental", function()
-    require("nvim-treesitter.incremental_selection").node_decremental()
-  end, {})
-  
-  -- VSCode integration commands
-  vim.api.nvim_create_user_command("VSQuickOpen", function()
-    vim.fn.VSCodeNotify("workbench.action.quickOpen")
-  end, {})
-  
-  vim.api.nvim_create_user_command("VSFindInFiles", function()
-    vim.fn.VSCodeNotify("workbench.action.findInFiles")
-  end, {})
+  -- You can create your own custom commands here
+  -- These can then be mapped in VSpaceCode settings.json to menu items
   
   -- Function to run Neovim commands in terminal split
   local function create_terminal_command(name, cmd)

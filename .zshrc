@@ -81,9 +81,10 @@ export SUDO_EDITOR=nvim
 export FCEDIT=nvim
 export TERMINAL=alacritty
 export BROWSER=com.brave.Browser
+
 if [[ -x "$(command -v bat)" ]]; then
 	export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-	export PAGER=bat
+	export MANROFFOPT="-c"
 fi
 
 if [[ -x "$(command -v fzf)" ]]; then
@@ -216,21 +217,30 @@ alias cp='cp -iv'
 alias mv='mv -iv'
 alias rm='rm -iv'
 alias rmdir='rmdir -v'
+# alias ls='ls --color=auto -F --group-directories-first -lah'
+# alias ls='eza $eza_params'
+# alias l='eza --git-ignore $eza_params'
+alias ls='eza --all --header --long $eza_params'
+alias lsm='eza --all --header --long --sort=modified $eza_params'
+alias la='eza -lbhHigUmuSa'
+alias lx='eza -lbhHigUmuSa@'
+alias lt='eza --tree $eza_params'
+alias tree='eza --tree $eza_params'
 # alias grep='grep --color=auto'
 # alias fgrep='fgrep --color=auto'
 # alias egrep='egrep --color=auto'
 
 # Alias for neovim
-# if [[ -x "$(command -v nvim)" ]]; then
-# 	alias vi='nvim'
-# 	alias vim='nvim'
-# 	alias svi='sudo nvim'
-# 	alias vis='nvim "+set si"'
-# elif [[ -x "$(command -v vim)" ]]; then
-# 	alias vi='vim'
-# 	alias svi='sudo vim'
-# 	alias vis='vim "+set si"'
-# fi
+if [[ -x "$(command -v nvim)" ]]; then
+	alias vi='nvim'
+	alias vim='nvim'
+	alias svi='sudo nvim'
+	alias vis='nvim "+set si"'
+elif [[ -x "$(command -v vim)" ]]; then
+	alias vi='vim'
+	alias svi='sudo vim'
+	alias vis='vim "+set si"'
+fi
 
 # # Alias for lsd
 # if [[ -x "$(command -v lsd)" ]]; then
@@ -251,9 +261,9 @@ alias rmdir='rmdir -v'
 
 # # Alias For bat
 # # Link: https://github.com/sharkdp/bat
-# if [[ -x "$(command -v bat)" ]]; then
-#     alias cat='bat'
-# fi
+if [[ -x "$(command -v bat)" ]]; then
+    alias cat='bat'
+fi
 
 # # Alias for lazygit
 # # Link: https://github.com/jesseduffield/lazygit
@@ -377,4 +387,15 @@ source <(fzf --zsh)
 # eval "$(tmuxifier init -)"
 
 
+
+
 PATH=~/.console-ninja/.bin:$PATH
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Fix for xterm-kitty TERM on remote hosts
+if [[ "$TERM" == "xterm-kitty" ]]; then
+  export TERM=xterm-256color
+fi
+

@@ -4,20 +4,22 @@ local M = {}
 M.setup = function()
     local utils = require('customKeymaps.utils')
     local map = utils.map
-
-    -- Basic VSCode integration
-    map('n', '<Esc>', utils.clear_highlights)
-    map('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-    map('n', '<leader>p', function() utils.vscode_notify('workbench.action.showCommands') end)
-    map('n', '<leader>e', function() utils.vscode_notify('workbench.action.toggleSidebarVisibility') end)
-    map('n', '<leader>f', function() utils.vscode_notify('workbench.action.quickOpen') end)
-    map('n', '<leader>sg', function() utils.vscode_notify('workbench.action.findInFiles') end)
+    -- stay in indent mode
+    map('v', '<', '<gv')
+    map('v', '>', '>gv')
+    -- basic vscode integration
+    map('n', '<esc>', utils.clear_highlights)
+    map('t', '<esc><esc>', '<c-\\><c-n>', { desc = 'exit terminal mode' })
+    map('n', '<leader>p', function() utils.vscode_notify('workbench.action.showcommands') end)
+    map('n', '<leader>e', function() utils.vscode_notify('workbench.action.togglesidebarvisibility') end)
+    map('n', '<leader>f', function() utils.vscode_notify('workbench.action.quickopen') end)
+    map('n', '<leader>sg', function() utils.vscode_notify('workbench.action.findinfiles') end)
 
     -- Multiple Cursors (multicursor.nvim)
     local ok_mc, mc = pcall(require, "multicursor-nvim")
     if ok_mc then
         -- Add cursor above/below current line
-        map({"n", "x"}, "<C-Up>", function() mc.lineAddCursor(-1) end)
+        map({"n", "x"}, "<c-up>", function() mc.lineAddCursor(-1) end)
         map({"n", "x"}, "<C-Down>", function() mc.lineAddCursor(1) end)
         -- Add cursor at next match of word
         map({"n", "x"}, "<C-n>", function() mc.matchAddCursor(1) end)
