@@ -220,12 +220,12 @@ alias rmdir='rmdir -v'
 # alias ls='ls --color=auto -F --group-directories-first -lah'
 # alias ls='eza $eza_params'
 # alias l='eza --git-ignore $eza_params'
-alias ls='eza --all --header --long $eza_params'
-alias lsm='eza --all --header --long --sort=modified $eza_params'
-alias la='eza -lbhHigUmuSa'
-alias lx='eza -lbhHigUmuSa@'
-alias lt='eza --tree $eza_params'
-alias tree='eza --tree $eza_params'
+alias ls='eza --all --header --long --group-directories-first $eza_params'  # List files with eza
+alias lsm='eza --all --header --long --sort=modified $eza_params'  # List files with eza sorted by modified time
+alias la='eza -lbhHigUmuSa'  # List all files with eza
+alias lx='eza -lbhHigUmuSa@'  # List all files with eza including hidden files and extended attributes
+alias lt='eza --tree $eza_params'  # List files in tree format with eza
+alias tree='eza --tree $eza_params' # List files in tree format with eza
 # alias grep='grep --color=auto'
 # alias fgrep='fgrep --color=auto'
 # alias egrep='egrep --color=auto'
