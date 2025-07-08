@@ -34,7 +34,29 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
+
+# zsh-vi-mode needs special handling because it overrides keybindings
+# We'll load it but then redefine our own keybindings afterward
 zinit light jeffreytse/zsh-vi-mode
+
+# This function will run after zsh-vi-mode has initialized
+function zvm_after_init() {
+  # Rebind our custom keys that might have been overridden
+  bindkey '^p' history-search-backward
+  bindkey '^n' history-search-forward
+  bindkey ' ' magic-space                           # do history expansion on space
+  bindkey "^[[A" history-beginning-search-backward  # search history with up key
+  bindkey "^[[B" history-beginning-search-forward   # search history with down key
+  
+  # Custom FZF and Yazi shortcuts
+  bindkey '^f' fzf-file-widget                      # Ctrl+F to open FZF file finder
+  bindkey '^t' fzf-file-widget                      # Ctrl+T to open FZF file finder (standard)
+  bindkey '^g' fzf-cd-widget                        # Ctrl+G to open FZF directory finder
+  bindkey '\ec' fzf-cd-widget                       # Alt+C to open FZF directory finder (standard)
+  bindkey '^r' fzf-history-widget                   # Ctrl+R to search command history with FZF
+  bindkey '^e' _launch_yazi                         # Ctrl+E to launch Yazi file manager
+  bindkey '^_' _show_shortcuts                      # Ctrl+? to show ZSH shortcuts
+}
 
 # Add in snippets
 zinit snippet OMZP::git
@@ -88,17 +110,25 @@ if [[ -x "$(command -v bat)" ]]; then
 fi
 
 if [[ -x "$(command -v fzf)" ]]; then
+	# ------------FZF Configuration--------------
+	# Set up fzf key bindings and fuzzy completion
+	export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git "
+	export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+	export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
+
 	export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
+	  --height 40% \
+	  --layout=default \
+	  --border \
+	  --color=hl:#2dd4bf \
 	  --info=inline-right \
 	  --ansi \
-	  --layout=reverse \
 	  --border=rounded \
 	  --color=border:#27a1b9 \
 	  --color=fg:#c0caf5 \
 	  --color=gutter:#16161e \
 	  --color=header:#ff9e64 \
 	  --color=hl+:#2ac3de \
-	  --color=hl:#2ac3de \
 	  --color=info:#545c7e \
 	  --color=marker:#ff007c \
 	  --color=pointer:#ff007c \
@@ -108,12 +138,17 @@ if [[ -x "$(command -v fzf)" ]]; then
 	  --color=separator:#ff9e64 \
 	  --color=spinner:#ff007c \
 	"
+
+	# Setup fzf previews
+	export FZF_CTRL_T_OPTS="--preview 'bat --color=always -n --line-range :500 {}'"
+	export FZF_ALT_C_OPTS="--preview 'eza --icons=always --tree --color=always {} | head -200'"
 fi
 
 #######################################################
-# ZSH Keybindings
+# Keybindings
 #######################################################
 
+# Need to bind keys AFTER sourcing fzf and other plugins that might override them
 bindkey -v
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
@@ -124,7 +159,9 @@ bindkey "^[[B" history-beginning-search-forward   # search history with down key
 
 # Custom FZF and Yazi shortcuts
 bindkey '^f' fzf-file-widget                      # Ctrl+F to open FZF file finder
+bindkey '^t' fzf-file-widget                      # Ctrl+T to open FZF file finder (standard)
 bindkey '^g' fzf-cd-widget                        # Ctrl+G to open FZF directory finder
+bindkey '\ec' fzf-cd-widget                       # Alt+C to open FZF directory finder (standard)
 bindkey '^r' fzf-history-widget                   # Ctrl+R to search command history with FZF
 bindkey '^e' _launch_yazi                         # Ctrl+E to launch Yazi file manager
 bindkey '^_' _show_shortcuts                      # Ctrl+? to show ZSH shortcuts
@@ -300,7 +337,9 @@ fi
 # Alias for FZF
 # Link: https://github.com/junegunn/fzf
 if [[ -x "$(command -v fzf)" ]]; then
-    alias fzf='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
+    # Don't alias the main fzf command as that can break integration
+    # Instead create a custom command for interactive use
+    alias fzfi='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
     # Alias to fuzzy find files in the current folder(s), preview them, and launch in an editor
 	if [[ -x "$(command -v xdg-open)" ]]; then
 		alias preview='open $(fzf --info=inline --query="${@}")'
@@ -327,14 +366,6 @@ fi
 #######################################################
 # Functions
 #######################################################
-
-function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	IFS= read -r -d '' cwd < "$tmp"
-	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
-	rm -f -- "$tmp"
-}
 
 # Start a program but immediately disown it and detach it from the terminal
 function runfree() {
@@ -411,7 +442,11 @@ source ~/.config/zsh/zsh-syntax-highlightin-tokyonight.zsh
 #######################################################
 
 # Set up fzf key bindings and fuzzy completion
-source <(fzf --zsh)
+if [[ -f ~/.fzf.zsh ]]; then
+  source ~/.fzf.zsh
+elif type fzf &>/dev/null; then
+  source <(fzf --zsh)
+fi
 
 # Zoxide config for zsh plugins 
 # eval "$(zoxide init --cmd cd zsh)"
