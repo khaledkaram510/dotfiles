@@ -6,13 +6,45 @@
 # \____/\____/\__,_/\___/\____/ .___/____/   /_/ /_/\___\_\ 
 #                            /_/
 #
-#
+
+#######################################################
+# SECTION 1: PROMPT AND SHELL INITIALIZATION
+#######################################################
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
+
+# Fix for xterm-kitty TERM on remote hosts
+if [[ "$TERM" == "xterm-kitty" ]]; then
+  export TERM=xterm-256color
+fi
+
+#######################################################
+# SECTION 2: ENVIRONMENT VARIABLES
+#######################################################
+
+# Editor configuration
+export EDITOR=nvim visudo
+export VISUAL=nvim visudo
+export SUDO_EDITOR=nvim
+export FCEDIT=nvim
+export TERMINAL=alacritty
+export BROWSER=com.brave.Browser
+
+# Vi mode settings
+export KEYTIMEOUT=1  # Make vim mode transitions faster (in hundredths of a second)
+
+# Bat configuration (if available)
+if [[ -x "$(command -v bat)" ]]; then
+	export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+	export MANROFFOPT="-c"
+fi
+
+#######################################################
+# SECTION 3: ZINIT PLUGIN MANAGER
+#######################################################
 
 # Set the directory we want to store zinit and plugins
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -36,40 +68,14 @@ zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
 
 # zsh-vi-mode needs special handling because it overrides keybindings
-# We'll load it but then redefine our own keybindings afterward
 zinit light jeffreytse/zsh-vi-mode
 
-# This function will run after zsh-vi-mode has initialized
-function zvm_after_init() {
-  # Rebind our custom keys that might have been overridden
-  bindkey '^p' history-search-backward
-  bindkey '^n' history-search-forward
-  bindkey ' ' magic-space                           # do history expansion on space
-  bindkey "^[[A" history-beginning-search-backward  # search history with up key
-  bindkey "^[[B" history-beginning-search-forward   # search history with down key
-  
-  # Custom FZF and Yazi shortcuts
-  bindkey '^f' fzf-file-widget                      # Ctrl+F to open FZF file finder
-  bindkey '^t' fzf-file-widget                      # Ctrl+T to open FZF file finder (standard)
-  bindkey '^g' fzf-cd-widget                        # Ctrl+G to open FZF directory finder
-  bindkey '\ec' fzf-cd-widget                       # Alt+C to open FZF directory finder (standard)
-  bindkey '^r' fzf-history-widget                   # Ctrl+R to search command history with FZF
-  bindkey '^e' _launch_yazi                         # Ctrl+E to launch Yazi file manager
-  bindkey '^_' _show_shortcuts                      # Ctrl+? to show ZSH shortcuts
-}
-
-# Add in snippets
+# Snippets from Oh-My-Zsh
 zinit snippet OMZP::git
 zinit snippet OMZP::sudo
 # zinit snippet OMZP::tmuxinator
 zinit snippet OMZP::docker
 zinit snippet OMZP::command-not-found
-
-# Disable the cursor style feature
-# ZVM_CURSOR_STYLE_ENABLED=false
-ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
-ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BLOCK
-ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_BLINKING_UNDERLINE
 
 # Load completions
 autoload -Uz compinit && compinit
@@ -80,42 +86,51 @@ zinit cdreplay -q
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 #######################################################
-# ZSH Basic Options
+# SECTION 4: ZSH BASIC OPTIONS
 #######################################################
 
 setopt autocd              # change directory just by typing its name
 setopt correct             # auto correct mistakes
 setopt interactivecomments # allow comments in interactive mode
-setopt magicequalsubst     # enable filename expansion for arguments of the form ‘anything=expression’
+setopt magicequalsubst     # enable filename expansion for arguments of the form 'anything=expression'
 setopt nonomatch           # hide error message if there is no match for the pattern
 setopt notify              # report the status of background jobs immediately
 setopt numericglobsort     # sort filenames numerically when it makes sense
 setopt promptsubst         # enable command substitution in prompt
 
 #######################################################
-# Environment Variables
+# SECTION 5: HISTORY CONFIGURATION
 #######################################################
-# export EDITOR=nvim
-# export VISUAL=nvim
-export EDITOR=nvim visudo
-export VISUAL=nvim visudo
-export SUDO_EDITOR=nvim
-export FCEDIT=nvim
-export TERMINAL=alacritty
-export BROWSER=com.brave.Browser
 
-if [[ -x "$(command -v bat)" ]]; then
-	export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-	export MANROFFOPT="-c"
-fi
+# Where and how much history is stored
+HISTSIZE=10000                    # In-memory history size
+SAVEHIST=$HISTSIZE                # Number of lines saved to file
+HISTFILE=~/.zsh_history           # History file path
+
+# History behavior options
+setopt APPEND_HISTORY             # Append history instead of overwriting
+setopt INC_APPEND_HISTORY         # Add commands to history immediately
+setopt SHARE_HISTORY              # Share history across terminals
+
+# Duplicates and whitespace cleanup
+setopt HIST_IGNORE_SPACE          # Ignore commands starting with space
+setopt HIST_IGNORE_ALL_DUPS       # Remove all old duplicates of a command
+setopt HIST_SAVE_NO_DUPS          # Don't save duplicate lines
+setopt HIST_IGNORE_DUPS           # Don't store duplicates from same session
+setopt HIST_FIND_NO_DUPS          # Don't show duplicates when searching
+setopt HIST_REDUCE_BLANKS         # Trim excess whitespace in commands
+
+#######################################################
+# SECTION 6: FZF CONFIGURATION
+#######################################################
 
 if [[ -x "$(command -v fzf)" ]]; then
-	# ------------FZF Configuration--------------
-	# Set up fzf key bindings and fuzzy completion
+	# FZF Commands configuration
 	export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git "
 	export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 	export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
 
+	# FZF appearance and behavior
 	export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 	  --height 40% \
 	  --layout=default \
@@ -139,41 +154,33 @@ if [[ -x "$(command -v fzf)" ]]; then
 	  --color=spinner:#ff007c \
 	"
 
-	# Setup fzf previews
+	# FZF preview settings
 	export FZF_CTRL_T_OPTS="--preview 'bat --color=always -n --line-range :500 {}'"
 	export FZF_ALT_C_OPTS="--preview 'eza --icons=always --tree --color=always {} | head -200'"
 fi
 
 #######################################################
-# Keybindings
+# SECTION 7: ZSH FUNCTIONS
 #######################################################
 
-# Need to bind keys AFTER sourcing fzf and other plugins that might override them
-bindkey -v
-bindkey '^p' history-search-backward
-bindkey '^n' history-search-forward
-# bindkey '^[w' kill-region
-bindkey ' ' magic-space                           # do history expansion on space
-bindkey "^[[A" history-beginning-search-backward  # search history with up key
-bindkey "^[[B" history-beginning-search-forward   # search history with down key
+# Custom function for Yazi file manager with directory tracking
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
 
-# Custom FZF and Yazi shortcuts
-bindkey '^f' fzf-file-widget                      # Ctrl+F to open FZF file finder
-bindkey '^t' fzf-file-widget                      # Ctrl+T to open FZF file finder (standard)
-bindkey '^g' fzf-cd-widget                        # Ctrl+G to open FZF directory finder
-bindkey '\ec' fzf-cd-widget                       # Alt+C to open FZF directory finder (standard)
-bindkey '^r' fzf-history-widget                   # Ctrl+R to search command history with FZF
-bindkey '^e' _launch_yazi                         # Ctrl+E to launch Yazi file manager
-bindkey '^_' _show_shortcuts                      # Ctrl+? to show ZSH shortcuts
-
-# Function to launch Yazi
+# ZLE function to launch Yazi
 _launch_yazi() {
   BUFFER="y"
   zle accept-line
 }
 zle -N _launch_yazi
 
-# Function to show ZSH shortcuts
+# ZLE function to show shortcuts
 _show_shortcuts() {
   if [[ -x "$(command -v bat)" ]]; then
     bat --style=full --language=markdown --color=always ~/dotfiles/zsh_shortcuts.txt
@@ -184,188 +191,15 @@ _show_shortcuts() {
 }
 zle -N _show_shortcuts
 
-#######################################################
-# History Configuration (Improved)
-#######################################################
-
-# Where and how much history is stored
-HISTSIZE=10000                    # In-memory history size
-SAVEHIST=$HISTSIZE                # Number of lines saved to file
-HISTFILE=~/.zsh_history           # History file path
-
-# History behavior options
-setopt APPEND_HISTORY             # Append history instead of overwriting
-setopt INC_APPEND_HISTORY         # Add commands to history immediately
-setopt SHARE_HISTORY              # Share history across terminals
-
-# Duplicates and whitespace cleanup
-setopt HIST_IGNORE_SPACE          # Ignore commands starting with space
-setopt HIST_IGNORE_ALL_DUPS       # Remove all old duplicates of a command
-setopt HIST_SAVE_NO_DUPS          # Don't save duplicate lines
-setopt HIST_IGNORE_DUPS           # Don't store duplicates from same session
-setopt HIST_FIND_NO_DUPS          # Don't show duplicates when searching
-setopt HIST_REDUCE_BLANKS         # Trim excess whitespace in commands
-
-
-#######################################################
-# Completion styling
-#######################################################
-
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
-zstyle ':completion:*:*:docker:*' option-stacking yes
-zstyle ':completion:*:*:docker-*:*' option-stacking yes
-
-#######################################################
-# Add Common Binary Directories to Path
-#######################################################
-
-# Add directories to the end of the path if they exist and are not already in the path
-# Link: https://superuser.com/questions/39751/add-directory-to-path-if-its-not-already-there
-function pathappend() {
-    for ARG in "$@"
-    do
-        if [ -d "$ARG" ] && [[ ":$PATH:" != *":$ARG:"* ]]; then
-            PATH="${PATH:+"$PATH:"}$ARG"
-        fi
-    done
+# Cursor shape function for vi mode
+function zle-keymap-select {
+  if [[ ${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
+    echo -ne '\e[1 q' # Block cursor for normal mode
+  elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] || [[ ${KEYMAP} = '' ]] || [[ $1 = 'beam' ]]; then
+    echo -ne '\e[5 q' # Beam cursor for insert mode
+  fi
 }
-
-# Add directories to the beginning of the path if they exist and are not already in the path
-function pathprepend() {
-    for ARG in "$@"
-    do
-        if [ -d "$ARG" ] && [[ ":$PATH:" != *":$ARG:"* ]]; then
-            PATH="$ARG${PATH:+":$PATH"}"
-        fi
-    done
-}
-
-# y shell wrapper that provides the ability to change the current working directory when exiting Yazi.
-function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
-}
-
-# Add the most common personal binary paths located inside the home folder
-# (these directories are only added if they exist)
-pathprepend "$HOME/bin" "$HOME/sbin" "$HOME/.local/bin" "$HOME/local/bin" "$HOME/.bin"
-
-# Check for the Rust package manager binary install location
-# Link: https://doc.rust-lang.org/cargo/index.html
-pathappend "$HOME/.cargo/bin"
-
-# Add Tmuxifier to path
-pathappend "$HOME/.config/tmux/plugins/tmuxifier/bin"
-
-#######################################################
-# Aliases
-#######################################################
-
-# alias h='fc -l 1 | less'           # Make 'history' open in less (readable/scrollable)
-alias h='fc -l 1 | nvim -R +$ -'     # View clean shell history in Neovim (read-only)
-alias c='clear'
-alias q='exit'
-alias ..='cd ..'
-alias mkdir='mkdir -pv'
-alias cp='cp -iv'
-alias mv='mv -iv'
-alias rm='rm -iv'
-alias rmdir='rmdir -v'
-# alias ls='ls --color=auto -F --group-directories-first -lah'
-# alias ls='eza $eza_params'
-# alias l='eza --git-ignore $eza_params'
-alias ls='eza --all --header --long -h --icons --group-directories-first $eza_params'  # List files with eza
-alias lsm='eza --all --header --long -h --icons --sort=modified $eza_params'  # List files with eza sorted by modified time
-alias la='eza -lbhHigUmuSa'  # List all files with eza
-alias lx='eza -lbhHigUmuSa@'  # List all files with eza including hidden files and extended attributes
-alias lt='eza --tree $eza_params'  # List files in tree format with eza
-alias tree='eza --tree $eza_params' # List files in tree format with eza
-# alias grep='grep --color=auto'
-# alias fgrep='fgrep --color=auto'
-# alias egrep='egrep --color=auto'
-
-# Alias for neovim
-if [[ -x "$(command -v nvim)" ]]; then
-	alias vi='nvim'
-	alias vim='nvim'
-	alias svi='sudo nvim'
-	alias vis='nvim "+set si"'
-elif [[ -x "$(command -v vim)" ]]; then
-	alias vi='vim'
-	alias svi='sudo vim'
-	alias vis='vim "+set si"'
-fi
-
-
-# # Alias for lsd
-# if [[ -x "$(command -v lsd)" ]]; then
-# 	alias ls='lsd -F --group-dirs first'
-# 	alias ll='lsd --all --header --long --group-dirs first'
-# 	alias tree='lsd --tree'
-# fi
-
-# # Alias to launch a document, file, or URL in it's default X application
-# if [[ -x "$(command -v xdg-open)" ]]; then
-# 	alias open='runfree xdg-open'
-# fi
-
-# # Alias to launch a document, file, or URL in it's default PDF reader
-# if [[ -x "$(command -v evince)" ]]; then
-#     alias pdf='runfree evince'
-# fi
-
-# # Alias For bat
-# # Link: https://github.com/sharkdp/bat
-if [[ -x "$(command -v bat)" ]]; then
-    alias cat='bat'
-fi
-
-# # Alias for lazygit
-# # Link: https://github.com/jesseduffield/lazygit
-# if [[ -x "$(command -v lazygit)" ]]; then
-#     alias lg='lazygit'
-# fi
-
-# Alias for FZF
-# Link: https://github.com/junegunn/fzf
-if [[ -x "$(command -v fzf)" ]]; then
-    # Don't alias the main fzf command as that can break integration
-    # Instead create a custom command for interactive use
-    alias fzfi='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
-    # Alias to fuzzy find files in the current folder(s), preview them, and launch in an editor
-	if [[ -x "$(command -v xdg-open)" ]]; then
-		alias preview='open $(fzf --info=inline --query="${@}")'
-	else
-		alias preview='edit $(fzf --info=inline --query="${@}")'
-	fi
-fi
-
-# # Get local IP addresses
-# if [[ -x "$(command -v ip)" ]]; then
-#     alias iplocal="ip -br -c a"
-# else
-#     alias iplocal="ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'"
-# fi
-
-# # Get public IP addresses
-# if [[ -x "$(command -v curl)" ]]; then
-#     alias ipexternal="curl -s ifconfig.me && echo"
-# elif [[ -x "$(command -v wget)" ]]; then
-#     alias ipexternal="wget -qO- ifconfig.me && echo"
-# fi
-
-
-#######################################################
-# Functions
-#######################################################
+zle -N zle-keymap-select
 
 # Start a program but immediately disown it and detach it from the terminal
 function runfree() {
@@ -375,7 +209,6 @@ function runfree() {
 # Copy file with a progress bar
 function cpp() {
 	if [[ -x "$(command -v rsync)" ]]; then
-		# rsync -avh --progress "${1}" "${2}"
 		rsync -ah --info=progress2 "${1}" "${2}"
 	else
 		set -e
@@ -421,7 +254,6 @@ function mkdirg() {
 }
 
 # Prints random height bars across the width of the screen
-# (great with lolcat application on new terminal windows)
 function random_bars() {
 	columns=$(tput cols)
 	chars=(▁ ▂ ▃ ▄ ▅ ▆ ▇ █)
@@ -432,14 +264,199 @@ function random_bars() {
 	echo
 }
 
-#######################################################
-# ZSH Syntax highlighting
-#######################################################
-source ~/.config/zsh/zsh-syntax-highlightin-tokyonight.zsh
+# PATH management functions
+function pathappend() {
+    for ARG in "$@"
+    do
+        if [ -d "$ARG" ] && [[ ":$PATH:" != *":$ARG:"* ]]; then
+            PATH="${PATH:+"$PATH:"}$ARG"
+        fi
+    done
+}
+
+function pathprepend() {
+    for ARG in "$@"
+    do
+        if [ -d "$ARG" ] && [[ ":$PATH:" != *":$ARG:"* ]]; then
+            PATH="$ARG${PATH:+":$PATH"}"
+        fi
+    done
+}
 
 #######################################################
-# Shell integrations
+# SECTION 8: ZSH KEYBINDINGS
 #######################################################
+
+# Enable vi mode
+bindkey -v
+
+# Fix for the slow escape in vim mode
+bindkey -M viins 'jk' vi-cmd-mode  # Press 'jk' to exit insert mode quickly
+
+# Bind keys for both vi insert and command modes
+bindkey -M viins '^p' history-search-backward
+bindkey -M vicmd '^p' history-search-backward
+bindkey -M viins '^n' history-search-forward
+bindkey -M vicmd '^n' history-search-forward
+bindkey -M viins ' ' magic-space                           # do history expansion on space
+bindkey -M viins "^[[A" history-beginning-search-backward  # search history with up key
+bindkey -M viins "^[[B" history-beginning-search-forward   # search history with down key
+
+# Custom FZF and Yazi shortcuts - bind to both insert and normal modes
+bindkey -M viins '^f' fzf-file-widget                      # Ctrl+F to open FZF file finder
+bindkey -M vicmd '^f' fzf-file-widget
+bindkey -M viins '^t' fzf-file-widget                      # Ctrl+T to open FZF file finder (standard)
+bindkey -M vicmd '^t' fzf-file-widget
+bindkey -M viins '^g' fzf-cd-widget                        # Ctrl+G to open FZF directory finder
+bindkey -M vicmd '^g' fzf-cd-widget
+bindkey -M viins '\ec' fzf-cd-widget                       # Alt+C to open FZF directory finder (standard)
+bindkey -M vicmd '\ec' fzf-cd-widget
+bindkey -M viins '^r' fzf-history-widget                   # Ctrl+R to search command history with FZF
+bindkey -M vicmd '^r' fzf-history-widget
+bindkey -M viins '^e' _launch_yazi                         # Ctrl+E to launch Yazi file manager
+bindkey -M vicmd '^e' _launch_yazi
+bindkey -M viins '^_' _show_shortcuts                      # Ctrl+? to show ZSH shortcuts
+bindkey -M vicmd '^_' _show_shortcuts
+
+# Ensure cursor shape is properly initialized
+echo -ne '\e[5 q'  # Initialize cursor to beam shape on startup
+
+#######################################################
+# SECTION 9: ZSH VI MODE PLUGIN CONFIGURATION
+#######################################################
+
+# Cursor style settings for zsh-vi-mode plugin
+# ZVM_CURSOR_STYLE_ENABLED=false  # Uncomment to disable cursor style changes
+ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
+ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BLOCK
+ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_BLINKING_UNDERLINE
+
+# Function to run after zsh-vi-mode has initialized
+function zvm_after_init() {
+  # Ensure FZF widgets are properly bound
+  autoload -U is-at-least
+  if is-at-least 5.2; then
+    # Use the new style for 5.2 and above
+    autoload -Uz add-zle-hook-widget
+    autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+    zle -N up-line-or-beginning-search
+    zle -N down-line-or-beginning-search
+  fi
+
+  # Rebind our custom keys for both modes
+  bindkey -M viins '^p' history-search-backward
+  bindkey -M vicmd '^p' history-search-backward
+  bindkey -M viins '^n' history-search-forward
+  bindkey -M vicmd '^n' history-search-forward
+  bindkey -M viins ' ' magic-space                           # do history expansion on space
+  bindkey -M viins "^[[A" history-beginning-search-backward  # search history with up key
+  bindkey -M viins "^[[B" history-beginning-search-forward   # search history with down key
+  
+  # Custom FZF and Yazi shortcuts - bind to both insert and normal modes
+  bindkey -M viins '^f' fzf-file-widget                      # Ctrl+F to open FZF file finder
+  bindkey -M vicmd '^f' fzf-file-widget
+  bindkey -M viins '^t' fzf-file-widget                      # Ctrl+T to open FZF file finder (standard)
+  bindkey -M vicmd '^t' fzf-file-widget
+  bindkey -M viins '^g' fzf-cd-widget                        # Ctrl+G to open FZF directory finder
+  bindkey -M vicmd '^g' fzf-cd-widget
+  bindkey -M viins '\ec' fzf-cd-widget                       # Alt+C to open FZF directory finder (standard)
+  bindkey -M vicmd '\ec' fzf-cd-widget
+  bindkey -M viins '^r' fzf-history-widget                   # Ctrl+R to search command history with FZF
+  bindkey -M vicmd '^r' fzf-history-widget
+  bindkey -M viins '^e' _launch_yazi                         # Ctrl+E to launch Yazi file manager
+  bindkey -M vicmd '^e' _launch_yazi
+  bindkey -M viins '^_' _show_shortcuts                      # Ctrl+? to show ZSH shortcuts
+  bindkey -M vicmd '^_' _show_shortcuts
+}
+
+#######################################################
+# SECTION 10: COMPLETION STYLING
+#######################################################
+
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
+
+#######################################################
+# SECTION 11: ALIASES
+#######################################################
+
+# History and navigation
+alias h='fc -l 1 | nvim -R +$ -'     # View clean shell history in Neovim (read-only)
+alias c='clear'
+alias q='exit'
+alias ..='cd ..'
+
+# File operations with safety
+alias mkdir='mkdir -pv'
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias rm='rm -iv'
+alias rmdir='rmdir -v'
+
+# Listing files with eza
+alias ls='eza --all --header --long -h --icons --group-directories-first $eza_params'
+alias lsm='eza --all --header --long -h --icons --sort=modified $eza_params'
+alias la='eza -lbhHigUmuSa'
+alias lx='eza -lbhHigUmuSa@'
+alias lt='eza --tree $eza_params'
+alias tree='eza --tree $eza_params'
+
+# Neovim aliases
+if [[ -x "$(command -v nvim)" ]]; then
+	alias vi='nvim'
+	alias vim='nvim'
+	alias svi='sudo nvim'
+	alias vis='nvim "+set si"'
+elif [[ -x "$(command -v vim)" ]]; then
+	alias vi='vim'
+	alias svi='sudo vim'
+	alias vis='vim "+set si"'
+fi
+
+# Bat as cat replacement
+if [[ -x "$(command -v bat)" ]]; then
+    alias cat='bat'
+fi
+
+# FZF aliases
+if [[ -x "$(command -v fzf)" ]]; then
+    # Interactive FZF with preview
+    alias fzfi='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
+    # File preview and open
+	if [[ -x "$(command -v xdg-open)" ]]; then
+		alias preview='open $(fzf --info=inline --query="${@}")'
+	else
+		alias preview='edit $(fzf --info=inline --query="${@}")'
+	fi
+fi
+
+#######################################################
+# SECTION 12: PATH CONFIGURATION
+#######################################################
+
+# Add personal binary paths
+pathprepend "$HOME/bin" "$HOME/sbin" "$HOME/.local/bin" "$HOME/local/bin" "$HOME/.bin"
+
+# Add Rust cargo binaries
+pathappend "$HOME/.cargo/bin"
+
+# Add Tmuxifier to path
+pathappend "$HOME/.config/tmux/plugins/tmuxifier/bin"
+
+# Console Ninja
+PATH=~/.console-ninja/.bin:$PATH
+
+#######################################################
+# SECTION 13: EXTERNAL SOURCES AND INTEGRATIONS
+#######################################################
+
+# ZSH Syntax highlighting
+source ~/.config/zsh/zsh-syntax-highlightin-tokyonight.zsh
 
 # Set up fzf key bindings and fuzzy completion
 if [[ -f ~/.fzf.zsh ]]; then
@@ -448,23 +465,13 @@ elif type fzf &>/dev/null; then
   source <(fzf --zsh)
 fi
 
-# Zoxide config for zsh plugins 
-# eval "$(zoxide init --cmd cd zsh)"
-
-
-# Tmuxifier config for zsh plugins  
-# eval "$(tmuxifier init -)"
-
-
-
-
-PATH=~/.console-ninja/.bin:$PATH
+# NVM (Node Version Manager)
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Fix for xterm-kitty TERM on remote hosts
-if [[ "$TERM" == "xterm-kitty" ]]; then
-  export TERM=xterm-256color
-fi
+# Zoxide config (commented out)
+# eval "$(zoxide init --cmd cd zsh)"
 
+# Tmuxifier config (commented out)
+# eval "$(tmuxifier init -)"
