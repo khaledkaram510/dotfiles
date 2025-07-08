@@ -1,0 +1,58 @@
+# ZSH KEYBOARD SHORTCUTS
+
+## NAVIGATION & HISTORY
+
+| Shortcut      | Description                              |
+|---------------|------------------------------------------|
+| `Ctrl+P`      | Search history backward                  |
+| `Ctrl+N`      | Search history forward                   |
+| `Up Arrow`    | Search history from beginning (backward) |
+| `Down Arrow`  | Search history from beginning (forward)  |
+| `Space`       | Expand history command                   |
+| `Ctrl+R`      | Fuzzy search command history with FZF (custom) |
+
+## FILE MANAGEMENT
+
+| Shortcut      | Description                              |
+|---------------|------------------------------------------|
+| `Ctrl+F`      | Find files with FZF (custom)             |
+| `Ctrl+T`      | Standard FZF file finder (default)       |
+| `Ctrl+G`      | Find and navigate to directories (custom)|
+| `Alt+C`       | Standard FZF directory finder (default)  |
+| `Ctrl+E`      | Open Yazi file manager                   |
+| `Ctrl+?`      | Show this shortcuts help                 |
+
+## TEXT EDITING (VI MODE)
+
+| Shortcut      | Description                              |
+|---------------|------------------------------------------|
+| `ESC`         | Enter Normal mode                        |
+| `i`           | Enter Insert mode                        |
+| `a`           | Append after cursor                      |
+| `A`           | Append at end of line                    |
+| `dd`          | Delete line                              |
+| `yy`          | Yank (copy) line                         |
+| `p`           | Paste                                    |
+| `u`           | Undo                                     |
+| `Ctrl+R`      | Redo                                     |
+
+## COMMAND ALIASES
+
+| Alias         | Description                              |
+|---------------|------------------------------------------|
+| `h`           | View history in Neovim                   |
+| `c`           | Clear terminal                           |
+| `q`           | Exit shell                               |
+| `..`          | Go up one directory                      |
+| `ls`          | List files (using eza)                   |
+| `la`          | List all files with detailed info        |
+| `lt/tree`     | List files in tree format                |
+| `cat`         | Show file with syntax highlighting (bat) |
+| `preview`     | Fuzzy find and open files                |
+| `y`           | Open Yazi file manager                   |
+| `cpp`         | Copy with progress bar                   |
+| `cpg`         | Copy and go to directory                 |
+| `mvg`         | Move and go to directory                 |
+| `mkdirg`      | Create and go to directory               |
+
+For full ZSH configuration, see: `~/.zshrc`

@@ -122,6 +122,31 @@ bindkey ' ' magic-space                           # do history expansion on spac
 bindkey "^[[A" history-beginning-search-backward  # search history with up key
 bindkey "^[[B" history-beginning-search-forward   # search history with down key
 
+# Custom FZF and Yazi shortcuts
+bindkey '^f' fzf-file-widget                      # Ctrl+F to open FZF file finder
+bindkey '^g' fzf-cd-widget                        # Ctrl+G to open FZF directory finder
+bindkey '^r' fzf-history-widget                   # Ctrl+R to search command history with FZF
+bindkey '^e' _launch_yazi                         # Ctrl+E to launch Yazi file manager
+bindkey '^_' _show_shortcuts                      # Ctrl+? to show ZSH shortcuts
+
+# Function to launch Yazi
+_launch_yazi() {
+  BUFFER="y"
+  zle accept-line
+}
+zle -N _launch_yazi
+
+# Function to show ZSH shortcuts
+_show_shortcuts() {
+  if [[ -x "$(command -v bat)" ]]; then
+    bat --style=full --language=markdown --color=always ~/dotfiles/zsh_shortcuts.txt
+  else
+    cat ~/dotfiles/zsh_shortcuts.txt
+  fi
+  zle reset-prompt
+}
+zle -N _show_shortcuts
+
 #######################################################
 # History Configuration (Improved)
 #######################################################
@@ -220,8 +245,8 @@ alias rmdir='rmdir -v'
 # alias ls='ls --color=auto -F --group-directories-first -lah'
 # alias ls='eza $eza_params'
 # alias l='eza --git-ignore $eza_params'
-alias ls='eza --all --header --long --group-directories-first $eza_params'  # List files with eza
-alias lsm='eza --all --header --long --sort=modified $eza_params'  # List files with eza sorted by modified time
+alias ls='eza --all --header --long -h --icons --group-directories-first $eza_params'  # List files with eza
+alias lsm='eza --all --header --long -h --icons --sort=modified $eza_params'  # List files with eza sorted by modified time
 alias la='eza -lbhHigUmuSa'  # List all files with eza
 alias lx='eza -lbhHigUmuSa@'  # List all files with eza including hidden files and extended attributes
 alias lt='eza --tree $eza_params'  # List files in tree format with eza
@@ -241,6 +266,7 @@ elif [[ -x "$(command -v vim)" ]]; then
 	alias svi='sudo vim'
 	alias vis='vim "+set si"'
 fi
+
 
 # # Alias for lsd
 # if [[ -x "$(command -v lsd)" ]]; then
@@ -301,6 +327,14 @@ fi
 #######################################################
 # Functions
 #######################################################
+
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
 
 # Start a program but immediately disown it and detach it from the terminal
 function runfree() {

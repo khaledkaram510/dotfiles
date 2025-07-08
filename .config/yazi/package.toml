@@ -22,3 +22,18 @@ hash = "98e5f5af3efd3ba8bc2db0720187cc83"
 use = "kalidyasin/yazi-flavors:tokyonight-night"
 rev = "095d95c"
 hash = "845c5ee33e147b1a57f48728e42600ee"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:dracula"
+rev = "d04a298"
+hash = "7b9ff01a0070cc9176e0c683329aeb26"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:catppuccin-macchiato"
+rev = "d04a298"
+hash = "e6c5beeb1da3199355734273ee452a7f"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:catppuccin-mocha"
+rev = "d04a298"
+hash = "288a0dedd5d13b28605cf82c05326dcd"

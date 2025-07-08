@@ -1,0 +1,68 @@
+# Tokyo Night Night flavor for Yazi
+# Based on Tokyo Night colors: https://github.com/folke/tokyonight.nvim
+
+[flavor]
+# UI elements
+border = { fg = "#7aa2f7" }
+title = { fg = "#7aa2f7", bold = true }
+selected = { fg = "#1a1b26", bg = "#7aa2f7" }
+selected_unfocused = { fg = "#1a1b26", bg = "#565f89" }
+command_fg = "#c0caf5"
+cmdline = { fg = "#c0caf5", bg = "#24283b" }
+status = { fg = "#c0caf5", bg = "#24283b" }
+hovered = { fg = "#c0caf5", bg = "#41506b" }
+preview_hovered = { underline = true }
+highlight = { fg = "#ff9e64", bold = true }
+disabled = "#565f89"
+warning = "#ff9e64"
+critical = "#f7768e"
+
+# Syntax highlighting for preview
+[syntax]
+comment = "#565f89"
+constant = "#ff9e64"
+string = "#9ece6a"
+character = "#9ece6a"
+number = "#ff9e64"
+boolean = "#ff9e64"
+float = "#ff9e64"
+identifier = "#c0caf5"
+function = "#7aa2f7"
+statement = "#bb9af7"
+conditional = "#bb9af7"
+repeat = "#bb9af7"
+label = "#7dcfff"
+operator = "#89ddff"
+keyword = "#bb9af7"
+exception = "#f7768e"
+preproc = "#7dcfff"
+include = "#7dcfff"
+define = "#7dcfff"
+macro = "#7dcfff"
+precondit = "#7dcfff"
+type = "#2ac3de"
+storageclass = "#2ac3de"
+structure = "#2ac3de"
+typedef = "#2ac3de"
+special = "#89ddff"
+specialchar = "#89ddff"
+tag = "#f7768e"
+delimiter = "#c0caf5"
+specialcomment = "#565f89"
+debug = "#f7768e"
+underlined = { underline = true }
+error = "#f7768e"
+todo = { fg = "#ff9e64", bold = true }
+
+[filetype]
+directory = "#7aa2f7"
+file = "#c0caf5"
+executable = "#9ece6a"
+symlink = "#2ac3de"
+broken_symlink = "#f7768e"
+fifo = "#ff9e64"
+socket = "#bb9af7"
+character_device = "#bb9af7"
+block_device = "#bb9af7"
+normal = "#c0caf5"
+unknown = "#565f89"
