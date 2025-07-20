@@ -26,8 +26,8 @@ fi
 #######################################################
 
 # Editor configuration
-export EDITOR=nvim visudo
-export VISUAL=nvim visudo
+export EDITOR='nvim' 
+export VISUAL='nvim' 
 export SUDO_EDITOR=nvim
 export FCEDIT=nvim
 export TERMINAL=alacritty
@@ -319,7 +319,7 @@ bindkey -M viins '^_' _show_shortcuts                      # Ctrl+? to show ZSH 
 bindkey -M vicmd '^_' _show_shortcuts
 
 # Ensure cursor shape is properly initialized
-echo -ne '\e[5 q'  # Initialize cursor to beam shape on startup
+# echo -ne '\e[5 q'  # Initialize cursor to beam shape on startup
 
 #######################################################
 # SECTION 9: ZSH VI MODE PLUGIN CONFIGURATION
@@ -461,8 +461,19 @@ source ~/.config/zsh/zsh-syntax-highlightin-tokyonight.zsh
 # Set up fzf key bindings and fuzzy completion
 if [[ -f ~/.fzf.zsh ]]; then
   source ~/.fzf.zsh
-elif type fzf &>/dev/null; then
-  source <(fzf --zsh)
+elif command -v fzf &>/dev/null; then
+  # Try the new --zsh flag first, fall back to older methods
+  if fzf --zsh &>/dev/null; then
+    source <(fzf --zsh)
+  else
+    # Fallback for older FZF versions
+    if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
+      source /usr/share/fzf/key-bindings.zsh
+    fi
+    if [[ -f /usr/share/fzf/completion.zsh ]]; then
+      source /usr/share/fzf/completion.zsh
+    fi
+  fi
 fi
 
 # NVM (Node Version Manager)
@@ -475,3 +486,6 @@ export NVM_DIR="$HOME/.nvm"
 
 # Tmuxifier config (commented out)
 # eval "$(tmuxifier init -)"
+
+# Initialize cursor to beam shape on startup (moved to end to avoid P10k instant prompt issues)
+echo -ne '\e[5 q'
