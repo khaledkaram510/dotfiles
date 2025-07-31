@@ -37,7 +37,10 @@ export BROWSER=com.brave.Browser
 export KEYTIMEOUT=1  # Make vim mode transitions faster (in hundredths of a second)
 
 # Bat configuration (if available)
-if [[ -x "$(command -v bat)" ]]; then
+if [[ -x "$(command -v batcat)" ]]; then
+	export MANPAGER="sh -c 'col -bx | batcat -l man -p'"
+	export MANROFFOPT="-c"
+elif [[ -x "$(command -v bat)" ]]; then
 	export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 	export MANROFFOPT="-c"
 fi
@@ -57,6 +60,13 @@ fi
 
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
+
+# TTY-friendly configuration for Powerlevel10k
+if [[ -n $SSH_TTY || $TERM == linux ]]; then
+  # If on TTY or SSH, disable configuration wizard
+  POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+  export POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD
+fi
 
 # Add in Powerlevel10k
 zinit ice depth=1; zinit light romkatv/powerlevel10k
@@ -83,7 +93,12 @@ autoload -Uz compinit && compinit
 zinit cdreplay -q
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# Use TTY-friendly prompt on linux console, otherwise load full p10k config
+if [[ $TERM == linux ]]; then
+  PROMPT='%n@%m:%~%# '
+else
+  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+fi
 
 #######################################################
 # SECTION 4: ZSH BASIC OPTIONS
@@ -155,8 +170,16 @@ if [[ -x "$(command -v fzf)" ]]; then
 	"
 
 	# FZF preview settings
-	export FZF_CTRL_T_OPTS="--preview 'bat --color=always -n --line-range :500 {}'"
+	export FZF_CTRL_T_OPTS="--preview 'batcat --color=always -n --line-range :500 {} 2>/dev/null || cat {}'"
 	export FZF_ALT_C_OPTS="--preview 'eza --icons=always --tree --color=always {} | head -200'"
+fi
+
+# fzf bindings & completion
+if [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
+  source /usr/share/doc/fzf/examples/key-bindings.zsh
+fi
+if [ -f /usr/share/doc/fzf/examples/completion.zsh ]; then
+  source /usr/share/doc/fzf/examples/completion.zsh
 fi
 
 #######################################################
@@ -182,7 +205,9 @@ zle -N _launch_yazi
 
 # ZLE function to show shortcuts
 _show_shortcuts() {
-  if [[ -x "$(command -v bat)" ]]; then
+  if [[ -x "$(command -v batcat)" ]]; then
+    batcat --style=full --language=markdown --color=always ~/dotfiles/zsh_shortcuts.txt
+  elif [[ -x "$(command -v bat)" ]]; then
     bat --style=full --language=markdown --color=always ~/dotfiles/zsh_shortcuts.txt
   else
     cat ~/dotfiles/zsh_shortcuts.txt
@@ -419,14 +444,20 @@ elif [[ -x "$(command -v vim)" ]]; then
 fi
 
 # Bat as cat replacement
-if [[ -x "$(command -v bat)" ]]; then
-    alias cat='bat'
+if [[ -x "$(command -v batcat)" ]]; then
+    alias cat='batcat --paging=never'
+elif [[ -x "$(command -v bat)" ]]; then
+    alias cat='bat --paging=never'
 fi
 
 # FZF aliases
 if [[ -x "$(command -v fzf)" ]]; then
     # Interactive FZF with preview
-    alias fzfi='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
+    if [[ -x "$(command -v batcat)" ]]; then
+        alias fzfi='fzf --preview "batcat --style=numbers --color=always --line-range :500 {} 2>/dev/null || cat {}"'
+    else
+        alias fzfi='fzf --preview "bat --style=numbers --color=always --line-range :500 {} 2>/dev/null || cat {}"'
+    fi
     # File preview and open
 	if [[ -x "$(command -v xdg-open)" ]]; then
 		alias preview='open $(fzf --info=inline --query="${@}")'
