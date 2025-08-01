@@ -85,6 +85,7 @@ zinit snippet OMZP::git
 zinit snippet OMZP::sudo
 # zinit snippet OMZP::tmuxinator
 zinit snippet OMZP::docker
+zinit snippet OMZP::docker-compose
 zinit snippet OMZP::command-not-found
 
 # Load completions
@@ -405,6 +406,7 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
+zstyle ':completion:*:*:docker-compose:*' option-stacking yes
 
 #######################################################
 # SECTION 11: ALIASES
